@@ -167,7 +167,8 @@
   <div class="panel" id="panel-liked">
     <div class="card">
       <h3 style="font-size:16px;font-weight:800;color:#0F172A">הוסף מודעה שאהבת ❤️</h3>
-      <p style="font-size:12px;color:#94A3B8;margin:2px 0 0">הדבק קישור ולחץ "מלא אוטומטית", או מלא ידנית. הכול נשמר במכשיר שלך — עובד גם בלי אינטרנט.</p>
+      <p style="font-size:12px;color:#94A3B8;margin:2px 0 0">הכול נשמר במכשיר שלך — עובד גם בלי אינטרנט.</p>
+      <div class="info-box" style="margin:12px 0 0">💡 <strong>הדרך הכי אמינה:</strong> במודעה (יד2 / פייסבוק וכו׳) לחץ <strong>שתף</strong> ובחר <strong>"מוצאים דירה לחמוצים"</strong> — הקישור והפרטים ייקלטו אוטומטית. <br>משיכה מקישור מודבק לא תמיד עובדת כי יד2 חוסם בוטים.</div>
       <div class="url-row" style="margin-top:12px">
         <input id="favUrl" placeholder="https://www.yad2.co.il/item/..." inputmode="url" onkeydown="if(event.key==='Enter'){event.preventDefault();autofill();}">
         <button class="btn-primary" id="favFetchBtn" onclick="autofill()">✨ מלא אוטומטית</button>
@@ -359,7 +360,7 @@ async function autofill() {
     const s = srcOf(url);
     setFieldIfEmpty("favTitle", "מודעה ב" + s.name);
     st.className = "fetch-status warn";
-    st.textContent = "⚠️ לא הצלחנו למשוך אוטומטית — מלא את הפרטים ידנית (הקישור נשמר)";
+    st.textContent = "⚠️ האתר חוסם משיכה אוטומטית. נסה 'שתף' מהמודעה, או מלא ידנית (הקישור נשמר)";
   }
   btn.disabled = false; btn.innerHTML = original;
 }
@@ -433,6 +434,43 @@ function renderLiked() {
 }
 
 updateLikedBadge();
+
+/* ===== Web Share Target — receive a shared listing from another app ===== */
+function extractUrl(s) { const m = String(s || "").match(/https?:\/\/[^\s]+/); return m ? m[0] : ""; }
+(function handleShare() {
+  const p = new URLSearchParams(location.search);
+  if (!p.has("url") && !p.has("text") && !p.has("title")) return;
+
+  const title = (p.get("title") || "").trim();
+  const text = (p.get("text") || "").trim();
+  let url = (p.get("url") || "").trim();
+  if (!url) url = extractUrl(text) || extractUrl(title);
+
+  // open the Liked tab
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(x => x.classList.remove("active"));
+  const tabBtn = document.querySelector('.tab[onclick*="liked"]');
+  if (tabBtn) tabBtn.classList.add("active");
+  document.getElementById("panel-liked").classList.add("active");
+
+  // prefill from whatever the source app handed us (no fetch needed)
+  if (url) document.getElementById("favUrl").value = url;
+  const blob = [title, text].filter(Boolean).join(" ");
+  const info = parseListing(blob);
+  let t = (title || text.replace(url, "")).trim();
+  if (t) setFieldIfEmpty("favTitle", t.slice(0, 100));
+  setFieldIfEmpty("favPrice", info.price);
+  setFieldIfEmpty("favRooms", info.rooms);
+  setFieldIfEmpty("favSize", info.size);
+
+  const st = document.getElementById("fetchStatus");
+  st.className = "fetch-status ok";
+  st.textContent = "✓ נקלט משיתוף — בדוק, השלם מה שחסר ולחץ ‘אהבתי — שמור’";
+
+  renderLiked();
+  // strip the query params so a refresh/reopen doesn't re-trigger
+  history.replaceState(null, "", location.pathname);
+})();
 </script>
 </body>
 </html>
