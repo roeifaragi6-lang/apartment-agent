@@ -1,5 +1,5 @@
-const CACHE = "apt-agent-v3";
-const ASSETS = ["/", "/index.html", "/manifest.json"];
+const CACHE = "apt-agent-v4";
+const ASSETS = ["/", "/index.html", "/manifest.json", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/favicon.png"];
 
 // Install: pre-cache core assets and activate immediately
 self.addEventListener("install", e => {
