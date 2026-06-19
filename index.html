@@ -165,8 +165,8 @@
       <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin-bottom:4px">הוסף דירה מ-URL</h3>
       <p style="font-size:12px;color:#94A3B8;margin-bottom:12px">הדבק לינק של מודעה ספציפית מיד2 / מדלן / הומס</p>
       <div class="url-input-row">
-        <input class="url-input" id="urlInput" placeholder="https://www.yad2.co.il/item/..." onkeydown="if(event.key==='Enter')extractUrl()">
-        <button class="btn-extract" id="extractBtn" onclick="extractUrl()">✨ חלץ</button>
+        <input class="url-input" id="urlInput" placeholder="https://www.yad2.co.il/item/..." onkeydown="if(event.key==='Enter')saveUrl()">
+        <button class="btn-extract" id="extractBtn" onclick="saveUrl()">✨ חלץ</button>
       </div>
       <div class="error-msg" id="urlError"></div>
       <div class="extracted-box" id="extractedBox" style="display:none"></div>
@@ -264,7 +264,7 @@ function getWarnings(apt) {
   return w;
 }
 
-async function extractUrl() {
+async function saveUrl() {
   const url = document.getElementById("urlInput").value.trim();
   if(!url) return;
   const btn = document.getElementById("extractBtn");
