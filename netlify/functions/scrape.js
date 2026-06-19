@@ -1,4 +1,3 @@
-const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 const cheerio = require('cheerio');
 
 exports.handler = async (event) => {
@@ -16,7 +15,7 @@ exports.handler = async (event) => {
   if (!url) return { statusCode: 400, headers, body: JSON.stringify({ error: 'No URL' }) };
 
   try {
-    const res = await fetch(url, {
+  const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
         'Accept-Language': 'he-IL,he;q=0.9',
