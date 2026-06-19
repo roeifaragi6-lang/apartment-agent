@@ -1,21 +1,215 @@
-name: Deploy to Netlify
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2563EB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="דירה">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סוכן חיפוש דירה</title>
+<script>
+  if('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #F8FAFC; color: #1E293B; min-height: 100vh; }
+  .header { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 20px 16px 0; position: sticky; top: 0; z-index: 100; }
+  .header-inner { max-width: 680px; margin: 0 auto; }
+  .logo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .logo-icon { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #2563EB, #7C3AED); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .logo-title { font-size: 20px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+  .tag { font-size: 11px; font-weight: 600; color: #64748B; background: #F1F5F9; padding: 2px 8px; border-radius: 100px; }
+  .tabs { display: flex; }
+  .tab { flex: 1; padding: 10px 8px; border: none; background: transparent; border-bottom: 2px solid transparent; color: #94A3B8; font-weight: 500; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .tab.active { border-bottom-color: #2563EB; color: #2563EB; font-weight: 700; }
+  .content { max-width: 680px; margin: 0 auto; padding: 20px 16px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #F1F5F9; }
+  .info-box { background: #EFF6FF; border-radius: 14px; padding: 12px 16px; margin-bottom: 20px; border: 1px solid #BFDBFE; font-size: 13px; color: #1E40AF; line-height: 1.7; }
+  .source-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #F8FAFC; }
+  .source-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .source-name { font-weight: 700; font-size: 15px; color: #0F172A; }
+  .source-links { padding: 8px 12px 10px; display: flex; flex-direction: column; gap: 4px; }
+  .source-link { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 10px; background: #F8FAFC; color: #374151; text-decoration: none; font-size: 13px; border: 1px solid #F1F5F9; font-weight: 500; }
+  .source-link:hover { background: #F1F5F9; }
+  .checklist-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .checklist-count { font-size: 22px; font-weight: 800; text-align: center; }
+  .progress-bar { height: 6px; background: #F1F5F9; border-radius: 100px; margin-bottom: 14px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #2563EB, #7C3AED); transition: width 0.3s ease; }
+  .check-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 12px; background: #F8FAFC; border: 1.5px solid #F1F5F9; cursor: pointer; margin-bottom: 6px; }
+  .check-item.checked { background: #F0FDF4; border-color: #BBF7D0; }
+  .check-box { width: 22px; height: 22px; border-radius: 6px; border: 2px solid #CBD5E1; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; font-weight: 800; color: #fff; }
+  .check-box.checked { background: #10B981; border-color: #10B981; }
+  .check-label { font-size: 13px; color: #374151; flex: 1; }
+  .check-label.checked { color: #16A34A; font-weight: 600; text-decoration: line-through; }
+  .btn-reset { margin-top: 12px; padding: 8px 16px; border-radius: 10px; border: 1.5px solid #E2E8F0; background: #fff; color: #94A3B8; font-size: 12px; cursor: pointer; }
+  .exclude-tag { padding: 5px 12px; border-radius: 100px; background: #FEF2F2; color: #DC2626; font-size: 12px; font-weight: 600; border: 1px solid #FECACA; display: inline-block; margin: 3px; }
+  .notif { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; background: #1E293B; color: #fff; padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 600; box-shadow: 0 8px 32px rgba(0,0,0,0.15); white-space: nowrap; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .notif.show { opacity: 1; }
+</style>
+</head>
+<body>
 
-on:
-  push:
-    branches: [main]
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-row">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-title">סוכן חיפוש דירה</div>
+        <div class="tags">
+          <span class="tag">3 חד׳+</span>
+          <span class="tag">75+ מ״ר</span>
+          <span class="tag">עד 7,000 ₪</span>
+          <span class="tag">מעלית</span>
+          <span class="tag">ת״א / ר״ג / גב׳</span>
+        </div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('sources', event)">🔍 מקורות</button>
+      <button class="tab" onclick="switchTab('checklist', event)">✅ צ׳קליסט</button>
+    </div>
+  </div>
+</div>
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v2
-        with:
-          publish-dir: '.'
-          production-branch: main
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "Auto deploy from GitHub"
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+<div class="content">
+
+  <!-- SOURCES -->
+  <div class="panel active" id="panel-sources">
+    <div class="info-box">🚫 <strong>לא מחפשים שותפים</strong> — בכל מודעה ודא שכתוב "לזוג" / "לשניים" ולא "דרוש שותף"</div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="source-header"><div class="source-icon" style="background:#2563EB22">🏠</div><span class="source-name">יד2</span></div>
+      <div class="source-links">
+        <a class="source-link" href="https://www.yad2.co.il/realestate/rent?city=5000&rooms=3-3&price=1000-7000&propertyGroup=apartments&elevator=1&minSquareMeter=75" target="_blank">תל אביב – 3 חד׳ עד 7,000 ₪ <span style="color:#2563EB">←</span></a>
+        <a class="source-link" href="https://www.yad2.co.il/realestate/rent?city=8600&rooms=3-3&price=1000-7000&propertyGroup=apartments&elevator=1&minSquareMeter=75" target="_blank">רמת גן – 3 חד׳ עד 7,000 ₪ <span style="color:#2563EB">←</span></a>
+        <a class="source-link" href="https://www.yad2.co.il/realestate/rent?city=6300&rooms=3-3&price=1000-7000&propertyGroup=apartments&elevator=1&minSquareMeter=75" target="_blank">גבעתיים – 3 חד׳ עד 7,000 ₪ <span style="color:#2563EB">←</span></a>
+        <a class="source-link" href="https://www.yad2.co.il/realestate/rent?city=5000&rooms=3-3&price=1000-8000&propertyGroup=apartments&elevator=1&minSquareMeter=75" target="_blank">תל אביב – עד 8,000 ₪ (גמישות) <span style="color:#2563EB">←</span></a>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="source-header"><div class="source-icon" style="background:#7C3AED22">🔑</div><span class="source-name">מדלן</span></div>
+      <div class="source-links">
+        <a class="source-link" href="https://www.madlan.co.il/for-rent/apartments/tel-aviv-yafo?dealType=rent&minRooms=3&maxRooms=3&maxPrice=7000&minSize=75" target="_blank">תל אביב – 3 חד׳ <span style="color:#7C3AED">←</span></a>
+        <a class="source-link" href="https://www.madlan.co.il/for-rent/apartments/ramat-gan?dealType=rent&minRooms=3&maxRooms=3&maxPrice=7000&minSize=75" target="_blank">רמת גן – 3 חד׳ <span style="color:#7C3AED">←</span></a>
+        <a class="source-link" href="https://www.madlan.co.il/for-rent/apartments/givatayim?dealType=rent&minRooms=3&maxRooms=3&maxPrice=7000&minSize=75" target="_blank">גבעתיים – 3 חד׳ <span style="color:#7C3AED">←</span></a>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="source-header"><div class="source-icon" style="background:#05966922">🏡</div><span class="source-name">הומס</span></div>
+      <div class="source-links">
+        <a class="source-link" href="https://www.homes.co.il/realestate/rent/city/%D7%AA%D7%9C-%D7%90%D7%91%D7%99%D7%91?rooms=3-3&maxPrice=7000" target="_blank">תל אביב – 3 חד׳ <span style="color:#059669">←</span></a>
+        <a class="source-link" href="https://www.homes.co.il/realestate/rent/city/%D7%A8%D7%9E%D7%AA-%D7%92%D7%9F?rooms=3-3&maxPrice=7000" target="_blank">רמת גן + גבעתיים <span style="color:#059669">←</span></a>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="source-header"><div class="source-icon" style="background:#1877F222">👥</div><span class="source-name">פייסבוק</span></div>
+      <div class="source-links">
+        <a class="source-link" href="https://www.facebook.com/groups/246039782107565" target="_blank">דירות להשכרה תל אביב <span style="color:#1877F2">←</span></a>
+        <a class="source-link" href="https://www.facebook.com/groups/tlvapartments" target="_blank">השכרת דירות תל אביב והמרכז <span style="color:#1877F2">←</span></a>
+        <a class="source-link" href="https://www.facebook.com/groups/ramatganrent" target="_blank">דירות להשכרה רמת גן גבעתיים <span style="color:#1877F2">←</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="panel" id="panel-checklist">
+    <div class="card">
+      <div class="checklist-header">
+        <div>
+          <h3 style="font-size:16px;font-weight:800;color:#0F172A">צ׳קליסט לכל דירה</h3>
+          <p style="font-size:12px;color:#94A3B8;margin-top:2px">בדוק כל פריט לפני שאתה יוצר קשר</p>
+        </div>
+        <div>
+          <div class="checklist-count" id="checkCount" style="color:#2563EB">0/11</div>
+          <div style="font-size:10px;color:#94A3B8">הושלמו</div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div id="checklistItems"></div>
+      <button class="btn-reset" onclick="resetChecklist()">אפס הכל</button>
+    </div>
+
+    <div class="card">
+      <h4 style="font-size:14px;font-weight:700;color:#DC2626;margin-bottom:12px">🚫 אזורים לפסילה מיידית</h4>
+      <div>
+        <span class="exclude-tag">דרום תל אביב</span>
+        <span class="exclude-tag">נווה שאנן</span>
+        <span class="exclude-tag">התקווה</span>
+        <span class="exclude-tag">שפירא</span>
+        <span class="exclude-tag">כרם התימנים</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+const CHECKLIST = [
+  {id:"elevator",icon:"🛗",label:"מעלית"},
+  {id:"condition",icon:"✨",label:"מצב משופץ / שמור / חדש"},
+  {id:"area",icon:"📍",label:"אזור מאושר (לא דרום ת\"א)"},
+  {id:"price",icon:"💰",label:"מחיר עד 7,000 ₪"},
+  {id:"rooms",icon:"🛏️",label:"3 חדרים מינימום"},
+  {id:"size",icon:"📐",label:"לפחות 75 מטר רבוע"},
+  {id:"noroommates",icon:"🚫",label:"דירה שלמה — לא שותפים"},
+  {id:"floor",icon:"🏢",label:"לא קומת קרקע"},
+  {id:"parking",icon:"🚗",label:"חניה (בונוס)"},
+  {id:"transport",icon:"🚌",label:"נגישות תחבורה ציבורית"},
+  {id:"owner",icon:"🤝",label:"בעל בית פרטי"},
+];
+
+let checks = {};
+
+function showNotif(msg) {
+  const n = document.getElementById("notif");
+  n.textContent = msg; n.classList.add("show");
+  setTimeout(() => n.classList.remove("show"), 3000);
+}
+
+function switchTab(tab, event) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  event.target.closest(".tab").classList.add("active");
+  document.getElementById("panel-" + tab).classList.add("active");
+  if (tab === "checklist") renderChecklist();
+}
+
+function renderChecklist() {
+  const el = document.getElementById("checklistItems");
+  el.innerHTML = CHECKLIST.map(item => `
+    <div class="check-item ${checks[item.id] ? "checked" : ""}" onclick="toggleCheck('${item.id}')">
+      <div class="check-box ${checks[item.id] ? "checked" : ""}">${checks[item.id] ? "✓" : ""}</div>
+      <span style="font-size:14px">${item.icon}</span>
+      <span class="check-label ${checks[item.id] ? "checked" : ""}">${item.label}</span>
+    </div>`).join("");
+  updateProgress();
+}
+
+function toggleCheck(id) {
+  checks[id] = !checks[id];
+  renderChecklist();
+}
+
+function updateProgress() {
+  const count = Object.values(checks).filter(Boolean).length;
+  const total = CHECKLIST.length;
+  document.getElementById("checkCount").textContent = `${count}/${total}`;
+  document.getElementById("checkCount").style.color = count === total ? "#10B981" : "#2563EB";
+  document.getElementById("progressFill").style.width = `${(count / total) * 100}%`;
+}
+
+function resetChecklist() { checks = {}; renderChecklist(); }
+</script>
+</body>
+</html>
